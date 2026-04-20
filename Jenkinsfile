@@ -25,7 +25,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying all files to XAMPP htdocs'
-                bat 'xcopy * C:\\xampp\\htdocs\\'
+                bat 'xcopy * C:\\xampp\\htdocs\/E /H /C /I /Y'
             }
         }
     }
