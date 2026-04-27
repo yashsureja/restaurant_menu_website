@@ -6,26 +6,25 @@ pipeline {
         stage('Clone') {
             steps {
                 echo 'Cloning repository...'
-                git 'https://github.com/yashsureja/restaurant_menu_website.git'
+                git branch: 'main',
+                url: 'https://github.com/yashsureja/restaurant_menu_website.git'
             }
         }
 
         stage('Build') {
             steps {
-                echo 'No build needed for HTML project'
+                echo 'No build required for HTML project'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Checking if index.html exists'
                 sh 'ls -l'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Running Docker Container'
                 sh 'docker build -t menu-app .'
                 sh 'docker stop menu || true'
                 sh 'docker rm menu || true'
