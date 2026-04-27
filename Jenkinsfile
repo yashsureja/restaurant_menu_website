@@ -5,30 +5,27 @@ pipeline {
 
         stage('Clone') {
             steps {
-                echo 'Cloning repository...'
-                git branch: 'main',
-                url: 'https://github.com/yashsureja/restaurant_menu_website.git'
+                echo 'Code Pulled from GitHub'
             }
         }
 
         stage('Build') {
             steps {
-                echo 'No build required for HTML project'
+                bat 'docker build -t restaurant-menu .'
             }
         }
 
-        stage('Test') {
+        stage('Run Container') {
             steps {
-                sh 'ls -l'
+                bat 'docker stop restaurant || exit 0'
+                bat 'docker rm restaurant || exit 0'
+                bat 'docker run -d -p 8085:80 --name restaurant restaurant-menu'
             }
         }
 
-        stage('Deploy') {
+        stage('Success') {
             steps {
-                sh 'docker build -t menu-app .'
-                sh 'docker stop menu || true'
-                sh 'docker rm menu || true'
-                sh 'docker run -d -p 8085:80 --name menu menu-app'
+                echo 'Project Successfully Deployed'
             }
         }
     }
