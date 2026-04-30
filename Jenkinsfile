@@ -17,6 +17,8 @@ pipeline {
 
         stage('Deploy to XAMPP') {
             steps {
+                bat 'if exist C:\\xampp\\htdocs\\restaurant\\website rmdir /S /Q C:\\xampp\\htdocs\\restaurant\\website'
+                bat 'mkdir C:\\xampp\\htdocs\\restaurant\\website'
                 bat 'xcopy "%WORKSPACE%\\*" "C:\\xampp\\htdocs\\restaurant\\website\\" /E /H /C /I /Y'
             }
         }
