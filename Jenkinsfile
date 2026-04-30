@@ -11,21 +11,20 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat 'docker build -t restaurant-menu .'
+                bat 'echo Building Website'
             }
         }
 
-        stage('Run Container') {
+        stage('Deploy to XAMPP') {
             steps {
-                bat 'docker stop restaurant || exit 0'
-                bat 'docker rm restaurant || exit 0'
-                bat 'docker run -d -p 8085:80 --name restaurant restaurant-menu'
+                bat 'if not exist C:\\xampp\\htdocs\\restaurant\\website mkdir C:\\xampp\\htdocs\\restaurant\\website'
+                bat 'xcopy /E /Y * C:\\xampp\\htdocs\\restaurant\\website\\'
             }
         }
 
         stage('Success') {
             steps {
-                echo 'Project Successfully Deployed'
+                echo 'Website Successfully Deployed to XAMPP'
             }
         }
     }
