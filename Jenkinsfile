@@ -17,14 +17,13 @@ pipeline {
 
         stage('Deploy to XAMPP') {
             steps {
-                bat 'if not exist C:\\xampp\\htdocs\\restaurant\\website mkdir C:\\xampp\\htdocs\\restaurant\\website'
-                bat 'xcopy /E /Y * C:\\xampp\\htdocs\\restaurant\\website\\'
+                bat 'xcopy "%WORKSPACE%\\*" "C:\\xampp\\htdocs\\restaurant\\website\\" /E /H /C /I /Y'
             }
         }
 
         stage('Success') {
             steps {
-                echo 'Website Successfully Deployed to XAMPP'
+                echo 'Website Updated Successfully'
             }
         }
     }
