@@ -1,4 +1,4 @@
-pipeline {
+ pipeline {
       agent any
 
       triggers {
@@ -7,6 +7,7 @@ pipeline {
 
       environment {
           HTDOCS_PATH = "C:\\xampp\\htdocs\\Restaurant_Menu_Website"
+          FILES = "index.html,menu.html,about.html,contact.html"
       }
 
       stages {
@@ -16,49 +17,35 @@ pipeline {
 
           stage('Lint HTML') {
               steps {
-                  bat '''
-                      @echo off
-                      set MISSING=0
-                      for %%f in (index.html menu.html about.html contact.html) do
-  (
-                          if not exist %%f (
-                              echo MISSING: %%f
-                              set MISSING=1
-                          ) else (
-                              echo Found: %%f
-                          )
-                      )
-                      if %MISSING%==1 exit /b 1
-                  '''
+                  script {
+                      def files = env.FILES.split(',')
+                      def missing = files.findAll { !fileExists(it.trim()) }
+                      if (missing) {
+                          error "Missing: ${missing.join(', ')}"
+                      }
+                      files.each { echo "Found: ${it}" }
+                  }
               }
           }
 
           stage('Deploy to XAMPP') {
               steps {
-                  bat """
-                      @echo off
-                      if not exist "%HTDOCS_PATH%" mkdir "%HTDOCS_PATH%"
-                      xcopy /E /Y /I . "%HTDOCS_PATH%"
-                  """
+                  bat 'if not exist "%HTDOCS_PATH%" mkdir "%HTDOCS_PATH%"'
+                  bat 'xcopy /E /Y /I . "%HTDOCS_PATH%"'
               }
           }
 
           stage('Verify Deployment') {
               steps {
-                  bat """
-                      @echo off
-                      set MISSING=0
-                      for %%f in (index.html menu.html about.html contact.html) do
-  (
-                          if not exist "%HTDOCS_PATH%\\%%f" (
-                              echo MISSING: %%f
-                              set MISSING=1
-                          ) else (
-                              echo Verified: %%f
-                          )
-                      )
-                      if %MISSING%==1 exit /b 1
-                  """
+                  script {
+                      def files = env.FILES.split(',')
+                      def missing = files.findAll {
+  !fileExists("${env.HTDOCS_PATH}\\${it.trim()}") }
+                      if (missing) {
+                          error "Missing in htdocs: ${missing.join(', ')}"
+                      }
+                      files.each { echo "Verified: ${it}" }
+                  }
               }
           }
       }
