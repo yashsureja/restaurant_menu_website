@@ -1,7 +1,4 @@
- docker build -t restaurant-menu-website:local .
-  docker run -d --name restaurant-menu -p 8081:80 restaurant-menu-website:local
-  docker ps
- pipeline {
+pipeline {
       agent any
 
       triggers {
@@ -11,10 +8,12 @@
       environment {
           HTDOCS_PATH = "C:\\xampp\\htdocs\\Restaurant_Menu_Website"
       }
+
       stages {
           stage('Checkout') {
               steps { checkout scm }
           }
+
           stage('Lint HTML') {
               steps {
                   bat '''
@@ -33,6 +32,7 @@
                   '''
               }
           }
+
           stage('Deploy to XAMPP') {
               steps {
                   bat """
@@ -42,6 +42,7 @@
                   """
               }
           }
+
           stage('Verify Deployment') {
               steps {
                   bat """
@@ -61,6 +62,7 @@
               }
           }
       }
+
       post {
           success { echo "http://localhost/Restaurant_Menu_Website/" }
           failure { echo "Pipeline FAILED." }
