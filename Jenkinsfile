@@ -7,7 +7,6 @@
 
       environment {
           HTDOCS_PATH = "C:\\xampp\\htdocs\\Restaurant_Menu_Website"
-          FILES = "index.html,menu.html,about.html,contact.html"
       }
 
       stages {
@@ -18,12 +17,19 @@
           stage('Lint HTML') {
               steps {
                   script {
-                      def files = env.FILES.split(',')
-                      def missing = files.findAll { !fileExists(it.trim()) }
+                      def files = ['index.html', 'menu.html', 'about.html',
+  'contact.html']
+                      def missing = []
+                      for (f in files) {
+                          if (fileExists(f)) {
+                              echo "Found: ${f}"
+                          } else {
+                              missing << f
+                          }
+                      }
                       if (missing) {
                           error "Missing: ${missing.join(', ')}"
                       }
-                      files.each { echo "Found: ${it}" }
                   }
               }
           }
@@ -38,13 +44,19 @@
           stage('Verify Deployment') {
               steps {
                   script {
-                      def files = env.FILES.split(',')
-                      def missing = files.findAll {
-  !fileExists("${env.HTDOCS_PATH}\\${it.trim()}") }
+                      def files = ['index.html', 'menu.html', 'about.html',
+  'contact.html']
+                      def missing = []
+                      for (f in files) {
+                          if (fileExists("${env.HTDOCS_PATH}\\${f}")) {
+                              echo "Verified: ${f}"
+                          } else {
+                              missing << f
+                          }
+                      }
                       if (missing) {
                           error "Missing in htdocs: ${missing.join(', ')}"
                       }
-                      files.each { echo "Verified: ${it}" }
                   }
               }
           }
