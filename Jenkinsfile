@@ -1,32 +1,54 @@
-pipeline {
-    agent any
-
-    stages {
-
-        stage('Clone') {
-            steps {
-                echo 'Code Pulled from GitHub'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                bat 'echo Building Website'
-            }
-        }
-
-        stage('Deploy to XAMPP') {
-            steps {
-                bat 'if exist C:\\xampp\\htdocs\\restaurant\\website rmdir /S /Q C:\\xampp\\htdocs\\restaurant\\website'
-                bat 'mkdir C:\\xampp\\htdocs\\restaurant\\website'
-                bat 'xcopy "%WORKSPACE%\\*" "C:\\xampp\\htdocs\\restaurant\\website\\" /E /H /C /I /Y'
-            }
-        }
-
-        stage('Success') {
-            steps {
-                echo 'Website Updated Successfully'
-            }
-        }
-    }
-}
+ pipeline {
+      agent any
+      environment {
+          HTDOCS_PATH = "C:\\xampp\\htdocs\\Restaurant_Menu_Website"
+      }
+      stages {
+          stage('Checkout') {
+              steps { checkout scm }
+          }
+          stage('Lint HTML') {
+              steps {
+                  bat '''
+                      @echo off
+                      set MISSING=0
+                      for %%f in (index.html menu.html about.html offers.html
+  contact.html) do (
+                          if not exist %%f ( echo MISSING: %%f & set MISSING=1 )
+  else ( echo Found: %%f )
+                      )
+                      if %MISSING%==1 exit /b 1
+                      echo All HTML present.
+                  '''
+              }
+          }
+          stage('Deploy to XAMPP') {
+              steps {
+                  bat """
+                      @echo off
+                      if not exist "%HTDOCS_PATH%" mkdir "%HTDOCS_PATH%"
+                      xcopy /E /Y /I . "%HTDOCS_PATH%"
+                      echo Site at http://localhost/Restaurant_Menu_Website/
+                  """
+              }
+          }
+          stage('Verify Deployment') {
+              steps {
+                  bat """
+                      @echo off
+                      set MISSING=0
+                      for %%f in (index.html menu.html about.html offers.html
+  contact.html) do (
+                          if not exist "%HTDOCS_PATH%\\%%f" ( echo MISSING: %%f &
+  set MISSING=1 ) else ( echo Verified: %%f )
+                      )
+                      if %MISSING%==1 exit /b 1
+                  """
+              }
+          }
+      }
+      post {
+          success { echo "Visit http://localhost/Restaurant_Menu_Website/" }
+          failure { echo "Pipeline FAILED." }
+      }
+  }
